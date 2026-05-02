@@ -1,0 +1,1883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>zaquchi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-primary: #0b1d3a;
+    --bg-secondary: #10264a;
+    --overlay-dark: rgba(5,10,20,0.45);
+    --glass: rgba(255,255,255,0.06);
+    --text-primary: #f4f7fb;
+    --text-secondary: #c8d6eb;
+    --text-muted: #8ea4c7;
+    --accent: #8ec5ff;
+    --glow: rgba(142,197,255,0.35);
+    --accent-soft: #b8dcff;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Manrope', sans-serif;
+    font-weight: 300;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  /* PAGES */
+  .page {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.7s ease;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+  .page.active {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  /* PARTICLES BG */
+  #particles-canvas {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ======================== INTRO PAGE ======================== */
+  #page-intro {
+    z-index: 10;
+    gap: 0;
+  }
+  .intro-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    text-align: center;
+  }
+  .intro-line {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.1rem, 3vw, 1.5rem);
+    font-weight: 300;
+    font-style: italic;
+    color: var(--text-secondary);
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity 0.9s ease, transform 0.9s ease;
+    padding: 0.35rem 0;
+    letter-spacing: 0.02em;
+  }
+  .intro-line.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .intro-line.main-hi {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 6vw, 3.2rem);
+    font-weight: 400;
+    color: var(--text-primary);
+    margin-bottom: 0.5rem;
+  }
+  .intro-continue-btn {
+    margin-top: 2.5rem;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    background: transparent;
+    border: 1px solid rgba(142,197,255,0.3);
+    color: var(--accent-soft);
+    padding: 0.7rem 2.2rem;
+    border-radius: 100px;
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: lowercase;
+  }
+  .intro-continue-btn:hover {
+    background: rgba(142,197,255,0.1);
+    box-shadow: 0 0 20px var(--glow);
+    transform: translateY(-2px);
+  }
+  .intro-continue-btn.show { opacity: 1; }
+
+  /* ======================== QUESTION PAGE ======================== */
+  #page-question {
+    z-index: 10;
+    gap: 3rem;
+  }
+  .question-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.8rem, 5vw, 2.8rem);
+    font-weight: 300;
+    font-style: italic;
+    color: var(--text-primary);
+    text-align: center;
+  }
+  .question-btns {
+    display: flex;
+    gap: 1.5rem;
+    position: relative;
+    height: 60px;
+    align-items: center;
+    justify-content: center;
+    width: 300px;
+  }
+  .q-btn {
+    background: rgba(142,197,255,0.08);
+    border: 1px solid rgba(142,197,255,0.3);
+    color: var(--accent-soft);
+    padding: 0.75rem 2rem;
+    border-radius: 100px;
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    letter-spacing: 0.05em;
+  }
+  .q-btn:hover {
+    background: rgba(142,197,255,0.15);
+    box-shadow: 0 0 18px var(--glow);
+    transform: translateY(-2px);
+  }
+  #btn-no {
+    position: relative;
+    transition: left 0.15s ease, top 0.15s ease, transform 0.3s ease;
+  }
+
+  /* ======================== PASSWORD PAGE ======================== */
+  #page-password {
+    z-index: 10;
+    gap: 2rem;
+  }
+  .pw-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.5rem, 4vw, 2.2rem);
+    font-style: italic;
+    color: var(--text-primary);
+    text-align: center;
+  }
+  .pw-input-wrap {
+    position: relative;
+  }
+  .pw-input {
+    background: var(--glass);
+    border: 1px solid rgba(142,197,255,0.25);
+    border-radius: 12px;
+    padding: 0.85rem 1.5rem;
+    color: var(--text-primary);
+    font-family: 'Manrope', sans-serif;
+    font-size: 1rem;
+    letter-spacing: 0.2em;
+    outline: none;
+    text-align: center;
+    width: 220px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+  .pw-input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 16px var(--glow);
+  }
+  .pw-hint {
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    text-align: center;
+    min-height: 1.2rem;
+    transition: opacity 0.4s;
+  }
+  .pw-success {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem;
+    font-style: italic;
+    color: var(--accent-soft);
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.6s;
+    min-height: 2rem;
+  }
+
+  /* ======================== MAIN HUB ======================== */
+  #page-hub {
+    z-index: 10;
+  }
+  .hub-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(0.75rem, 2vw, 0.95rem);
+    letter-spacing: 0.35em;
+    color: var(--text-muted);
+    text-transform: lowercase;
+    margin-bottom: 3.5rem;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.2s forwards;
+  }
+  .hub-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+  }
+  .hub-item {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    font-weight: 300;
+    font-style: italic;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: color 0.3s, letter-spacing 0.3s, text-shadow 0.3s;
+    opacity: 0;
+    letter-spacing: 0.02em;
+    line-height: 1.3;
+    text-align: center;
+  }
+  .hub-item:hover {
+    color: var(--accent-soft);
+    letter-spacing: 0.08em;
+    text-shadow: 0 0 30px var(--glow);
+  }
+  .hub-item.fade-in { animation: fadeUp 0.7s forwards; }
+
+  /* SECRET STAR */
+  #secret-star {
+    position: fixed;
+    top: 22px;
+    right: 28px;
+    font-size: 1.1rem;
+    opacity: 0.18;
+    cursor: pointer;
+    z-index: 100;
+    transition: opacity 0.4s, filter 0.4s, transform 0.4s;
+    user-select: none;
+    animation: twinkle 3s infinite ease-in-out;
+    display: none;
+    color: var(--accent-soft);
+  }
+  #secret-star:hover {
+    opacity: 0.75;
+    filter: drop-shadow(0 0 8px var(--accent));
+    transform: scale(1.2);
+  }
+  #secret-star.show { display: block; }
+
+  @keyframes twinkle {
+    0%,100% { transform: scale(1) rotate(0deg); }
+    50% { transform: scale(1.08) rotate(5deg); }
+  }
+
+  /* ======================== CONTENT PAGES ======================== */
+  .content-page-inner {
+    max-width: 680px;
+    width: 90%;
+    margin: 0 auto;
+    padding: 3rem 0;
+    position: relative;
+    z-index: 2;
+  }
+  .page-back-btn {
+    position: fixed;
+    top: 20px;
+    left: 24px;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.82rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: color 0.3s;
+    z-index: 200;
+    display: none;
+  }
+  .page-back-btn:hover { color: var(--accent); }
+  .page-back-btn.show { display: block; }
+
+  .section-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.2rem, 6vw, 3.5rem);
+    font-weight: 300;
+    font-style: italic;
+    color: var(--text-primary);
+    margin-bottom: 0.4rem;
+    line-height: 1.1;
+  }
+  .section-sub {
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    letter-spacing: 0.12em;
+    margin-bottom: 2.5rem;
+    text-transform: lowercase;
+  }
+  .prose {
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.92rem;
+    line-height: 1.9;
+    color: var(--text-secondary);
+    font-weight: 300;
+  }
+  .prose p { margin-bottom: 1.2rem; }
+
+  /* ======================== PROFILE PAGE ======================== */
+  #page-profile { z-index: 10; overflow-y: auto; }
+  .profile-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.6rem 2rem;
+    margin-bottom: 2rem;
+  }
+  @media(max-width:500px) { .profile-grid { grid-template-columns: 1fr; } }
+  .profile-label {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 0.15rem;
+  }
+  .profile-value {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.15rem;
+    color: var(--text-primary);
+    font-style: italic;
+  }
+  .profile-photo-placeholder {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+    border: 1px solid rgba(142,197,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 0 30px var(--glow);
+  }
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(142,197,255,0.25), transparent);
+    margin: 1.8rem 0;
+  }
+
+  /* ======================== MEMORIES PAGE ======================== */
+  #page-memories { z-index: 10; }
+  .memories-icons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+    max-width: 340px;
+  }
+  .mem-icon {
+    width: 72px;
+    height: 72px;
+    background: var(--glass);
+    border: 1px solid rgba(142,197,255,0.15);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+  .mem-icon:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px var(--glow);
+    border-color: rgba(142,197,255,0.4);
+    background: rgba(142,197,255,0.08);
+  }
+
+  /* Modal */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(5,10,20,0.75);
+    backdrop-filter: blur(8px);
+    z-index: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.4s;
+    padding: 1rem;
+  }
+  .modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+  }
+  .modal-card {
+    background: rgba(11,29,58,0.95);
+    border: 1px solid rgba(142,197,255,0.2);
+    border-radius: 24px;
+    padding: 2rem;
+    max-width: 500px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    transform: scale(0.92);
+    transition: transform 0.4s ease;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+  .modal-overlay.open .modal-card { transform: scale(1); }
+  .modal-close {
+    position: absolute;
+    top: 1rem;
+    right: 1.2rem;
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.3rem;
+    cursor: pointer;
+    transition: color 0.2s;
+    line-height: 1;
+  }
+  .modal-close:hover { color: var(--text-primary); }
+  .modal-emoji { font-size: 2.5rem; margin-bottom: 1rem; }
+  .modal-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem;
+    font-style: italic;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+  }
+
+  /* ======================== MUSIC PAGE ======================== */
+  #page-music { z-index: 10; overflow-y: auto; }
+  .music-card {
+    background: var(--glass);
+    border: 1px solid rgba(142,197,255,0.18);
+    border-radius: 20px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .song-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.4rem;
+    font-style: italic;
+    color: var(--accent-soft);
+    margin-bottom: 0.2rem;
+  }
+  .song-artist {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    letter-spacing: 0.12em;
+  }
+  .custom-player {
+    margin-top: 1.2rem;
+  }
+  .player-controls {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 0.75rem;
+  }
+  .play-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(142,197,255,0.12);
+    border: 1px solid rgba(142,197,255,0.3);
+    color: var(--accent-soft);
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s;
+    flex-shrink: 0;
+  }
+  .play-btn:hover {
+    background: rgba(142,197,255,0.2);
+    box-shadow: 0 0 16px var(--glow);
+  }
+  .progress-bar {
+    flex: 1;
+    height: 3px;
+    background: rgba(142,197,255,0.15);
+    border-radius: 10px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    border-radius: 10px;
+    transition: width 0.1s linear;
+    box-shadow: 0 0 8px var(--accent);
+  }
+  .time-label {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    min-width: 70px;
+    text-align: right;
+  }
+  .music-note-text {
+    font-size: 0.82rem;
+    font-style: italic;
+    color: var(--text-muted);
+    text-align: center;
+    margin-bottom: 1.5rem;
+  }
+
+  /* ======================== GAMES PAGE ======================== */
+  #page-games { z-index: 10; overflow-y: auto; }
+  .games-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1.5rem;
+  }
+  .game-card {
+    background: var(--glass);
+    border: 1px solid rgba(142,197,255,0.15);
+    border-radius: 18px;
+    padding: 1.5rem 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: left;
+  }
+  .game-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 30px var(--glow);
+    border-color: rgba(142,197,255,0.35);
+    background: rgba(142,197,255,0.06);
+  }
+  .game-card-icon { font-size: 1.5rem; margin-bottom: 0.6rem; }
+  .game-card-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    font-style: italic;
+    color: var(--text-primary);
+    margin-bottom: 0.3rem;
+  }
+  .game-card-sub {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+  }
+
+  /* Game modal inner content */
+  .game-inner {
+    min-height: 200px;
+  }
+  .game-question {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.3rem;
+    font-style: italic;
+    color: var(--text-primary);
+    margin-bottom: 1.2rem;
+    text-align: center;
+  }
+  .game-options {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .game-opt {
+    background: transparent;
+    border: 1px solid rgba(142,197,255,0.25);
+    border-radius: 10px;
+    padding: 0.7rem 1.2rem;
+    color: var(--text-secondary);
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.88rem;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.25s;
+  }
+  .game-opt:hover {
+    background: rgba(142,197,255,0.08);
+    border-color: var(--accent);
+    color: var(--text-primary);
+  }
+  .game-feedback {
+    margin-top: 1.2rem;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    font-style: italic;
+    color: var(--accent-soft);
+    text-align: center;
+    min-height: 1.5rem;
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .game-feedback.show { opacity: 1; }
+  .game-next-btn {
+    margin-top: 1rem;
+    background: transparent;
+    border: 1px solid rgba(142,197,255,0.3);
+    color: var(--accent);
+    padding: 0.5rem 1.5rem;
+    border-radius: 100px;
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: none;
+  }
+  .game-next-btn.show { display: block; }
+  .game-next-btn:hover { background: rgba(142,197,255,0.1); }
+
+  /* Tap counter */
+  .tap-number {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 5rem;
+    font-weight: 300;
+    color: var(--text-primary);
+    text-align: center;
+    line-height: 1;
+    transition: transform 0.1s ease;
+  }
+  .tap-number.pop { transform: scale(1.15); }
+  .tap-btn {
+    margin-top: 1.5rem;
+    background: rgba(142,197,255,0.06);
+    border: 1px solid rgba(142,197,255,0.25);
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    font-size: 1.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .tap-btn:hover, .tap-btn:active {
+    background: rgba(142,197,255,0.15);
+    box-shadow: 0 0 20px var(--glow);
+    transform: scale(0.95);
+  }
+
+  /* this or that */
+  .tot-pair {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  .tot-btn {
+    background: transparent;
+    border: 1px solid rgba(142,197,255,0.2);
+    border-radius: 14px;
+    padding: 1.2rem;
+    color: var(--text-secondary);
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.2rem;
+    font-style: italic;
+    cursor: pointer;
+    transition: all 0.25s;
+    text-align: center;
+  }
+  .tot-btn:hover {
+    background: rgba(142,197,255,0.08);
+    border-color: var(--accent);
+    color: var(--text-primary);
+    box-shadow: 0 0 18px var(--glow);
+  }
+
+  /* ======================== SECRET PAGE ======================== */
+  #page-secret {
+    z-index: 10;
+    background: rgba(5,10,20,0.98);
+  }
+  .secret-inner {
+    max-width: 520px;
+    width: 90%;
+    text-align: center;
+  }
+  .secret-line {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(1.2rem, 3.5vw, 1.7rem);
+    font-weight: 300;
+    color: var(--text-secondary);
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 1s ease, transform 1s ease;
+    margin-bottom: 1.2rem;
+    line-height: 1.5;
+  }
+  .secret-line.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .secret-line.final {
+    font-size: clamp(1.6rem, 5vw, 2.5rem);
+    color: var(--accent-soft);
+    text-shadow: 0 0 30px var(--glow);
+    font-style: italic;
+  }
+  .secret-photo {
+    width: 140px;
+    height: 140px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+    border: 1px solid rgba(142,197,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    margin: 1.5rem auto;
+    box-shadow: 0 0 40px var(--glow);
+    opacity: 0;
+    transition: opacity 1s;
+  }
+  .secret-photo.visible { opacity: 1; }
+
+  /* ======================== STORY PAGE ======================== */
+  #page-story { z-index: 10; overflow-y: auto; }
+  .poem-block {
+    margin-bottom: 2rem;
+  }
+  .poem-text {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    font-weight: 300;
+    color: var(--text-secondary);
+    line-height: 2.1;
+    font-style: italic;
+    white-space: pre-line;
+  }
+
+  /* ======================== GRADUATION PAGE ======================== */
+  #page-graduation { z-index: 10; overflow-y: auto; }
+
+  /* ======================== FUTURE PAGE ======================== */
+  #page-future { z-index: 10; overflow-y: auto; }
+
+  /* ======================== THANKYOU PAGE ======================== */
+  #page-thankyou { z-index: 10; overflow-y: auto; }
+
+  /* ======================== ENDING PAGE ======================== */
+  #page-ending {
+    z-index: 10;
+    background: rgba(5,8,15,0.99);
+  }
+  .ending-inner {
+    max-width: 520px;
+    width: 90%;
+    text-align: center;
+  }
+  .ending-date {
+    font-size: 0.75rem;
+    letter-spacing: 0.2em;
+    color: var(--text-muted);
+    margin-bottom: 2rem;
+  }
+  .ending-subtitle {
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    color: var(--text-muted);
+    margin-bottom: 2.5rem;
+  }
+  .ending-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.5rem, 7vw, 4rem);
+    font-weight: 300;
+    color: var(--text-primary);
+    margin-bottom: 2rem;
+    animation: softPulse 3s infinite ease-in-out;
+  }
+  @keyframes softPulse {
+    0%,100% { text-shadow: 0 0 20px rgba(142,197,255,0.3); }
+    50% { text-shadow: 0 0 40px rgba(142,197,255,0.6); }
+  }
+  .ending-meaning {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    line-height: 2;
+  }
+  .ending-meaning span {
+    color: var(--accent-soft);
+    font-style: italic;
+  }
+
+  /* ======================== FIRST IMPRESSION QNA ======================== */
+  #page-impression { z-index: 10; overflow-y: auto; }
+  .qna-item {
+    background: var(--glass);
+    border: 1px solid rgba(142,197,255,0.12);
+    border-radius: 16px;
+    padding: 1.2rem 1.4rem;
+    margin-bottom: 0.8rem;
+  }
+  .qna-q {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    font-style: italic;
+    color: var(--text-primary);
+    margin-bottom: 0.8rem;
+  }
+  .qna-btns { display: flex; gap: 0.7rem; }
+  .qna-btn {
+    background: transparent;
+    border: 1px solid rgba(142,197,255,0.2);
+    border-radius: 100px;
+    padding: 0.35rem 1.2rem;
+    color: var(--text-muted);
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.25s;
+  }
+  .qna-btn:hover {
+    background: rgba(142,197,255,0.08);
+    color: var(--accent-soft);
+    border-color: var(--accent);
+  }
+  .qna-response {
+    margin-top: 0.6rem;
+    font-size: 0.82rem;
+    font-style: italic;
+    color: var(--accent-soft);
+    min-height: 1rem;
+    opacity: 0;
+    transition: opacity 0.4s;
+  }
+  .qna-response.show { opacity: 1; }
+
+  /* SHARED ANIMATIONS */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(18px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(142,197,255,0.2); border-radius: 4px; }
+
+  /* Glow orbs */
+  .orb {
+    position: fixed;
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(80px);
+    opacity: 0.12;
+    z-index: 0;
+  }
+  .orb-1 {
+    width: 400px; height: 400px;
+    background: #1a4a8a;
+    top: -100px; right: -100px;
+  }
+  .orb-2 {
+    width: 300px; height: 300px;
+    background: #0a3060;
+    bottom: -80px; left: -80px;
+  }
+</style>
+</head>
+<body>
+
+<!-- Background orbs -->
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<canvas id="particles-canvas"></canvas>
+
+<!-- Back button (shared) -->
+<button class="page-back-btn" id="back-btn" onclick="goBack()">← back</button>
+
+<!-- Secret Star -->
+<div id="secret-star" onclick="goToPage('secret')">✦</div>
+
+<!-- ======================== INTRO PAGE ======================== -->
+<div class="page active" id="page-intro">
+  <div class="intro-lines" id="intro-lines">
+    <div class="intro-line main-hi" data-delay="300">"hi zahira"</div>
+    <div class="intro-line" data-delay="1200">"i made this for you"</div>
+    <div class="intro-line" data-delay="2100">"read it slowly ya"</div>
+    <div class="intro-line" data-delay="3000">"don't rush, okay?"</div>
+    <div class="intro-line" data-delay="3900">"just stay here for a bit"</div>
+  </div>
+  <button class="intro-continue-btn" id="intro-continue" onclick="goToPage('question')">continue →</button>
+</div>
+
+<!-- ======================== QUESTION PAGE ======================== -->
+<div class="page" id="page-question">
+  <div class="question-text">kamu sayang aku gak?</div>
+  <div class="question-btns" id="question-btns">
+    <button class="q-btn" id="btn-yes" onclick="handleYes()">iya</button>
+    <button class="q-btn" id="btn-no" onclick="handleNo()">engga</button>
+  </div>
+</div>
+
+<!-- ======================== PASSWORD PAGE ======================== -->
+<div class="page" id="page-password">
+  <div class="pw-title">"hal yang aku benci…"</div>
+  <div class="pw-input-wrap">
+    <input type="password" class="pw-input" id="pw-input" placeholder="· · · ·" maxlength="10"
+      oninput="checkPassword()" autocomplete="off" />
+  </div>
+  <div class="pw-hint" id="pw-hint"></div>
+  <div class="pw-success" id="pw-success"></div>
+</div>
+
+<!-- ======================== MAIN HUB ======================== -->
+<div class="page" id="page-hub">
+  <div class="hub-title">exploring zaquchi</div>
+  <nav class="hub-menu" id="hub-menu">
+    <div class="hub-item" onclick="goToPage('profile')">profile</div>
+    <div class="hub-item" onclick="goToPage('memories')">memories</div>
+    <div class="hub-item" onclick="goToPage('music')">music</div>
+    <div class="hub-item" onclick="goToPage('games')">games</div>
+    <div class="hub-item" onclick="goToPage('story')">story</div>
+    <div class="hub-item" onclick="goToPage('graduation')" style="font-size:clamp(1.2rem,3.5vw,2rem)">graduation</div>
+    <div class="hub-item" onclick="goToPage('future')" style="font-size:clamp(1.2rem,3.5vw,2rem)">future</div>
+    <div class="hub-item" onclick="goToPage('thankyou')" style="font-size:clamp(1.2rem,3.5vw,2rem)">thank you</div>
+    <div class="hub-item" onclick="goToPage('impression')" style="font-size:clamp(1.2rem,3.5vw,2rem)">first impression</div>
+    <div class="hub-item" onclick="goToPage('ending')" style="font-size:clamp(1.2rem,3.5vw,2rem)">ending</div>
+  </nav>
+</div>
+
+<!-- ======================== PROFILE PAGE ======================== -->
+<div class="page" id="page-profile">
+  <div class="content-page-inner">
+    <div class="profile-photo-placeholder">🌙</div>
+    <div class="section-title">profile</div>
+    <div class="section-sub">anggieta lituhayu tristyo</div>
+    <div class="profile-grid">
+      <div>
+        <div class="profile-label">date of birth</div>
+        <div class="profile-value">9 January 2010</div>
+      </div>
+      <div>
+        <div class="profile-label">school</div>
+        <div class="profile-value">SMKN 1 Jakarta</div>
+      </div>
+      <div>
+        <div class="profile-label">major</div>
+        <div class="profile-value">Sistem Informasi Jaringan dan Aplikasi</div>
+      </div>
+    </div>
+    <div class="divider"></div>
+    <div class="prose">
+      <p>This website started as something small. At first, it was only a simple idea — quiet, personal, and maybe a little unnecessary to anyone else. But some things feel too meaningful to be left as passing thoughts, so I turned them into something real.</p>
+      <p>It was made as a small gift, and as a quiet way to celebrate someone who has reached the end of one chapter and is about to begin another. A small congratulations for finishing middle school, for making it through everything that came with it, and for becoming someone even stronger along the way.</p>
+      <p>Not everything worth keeping has to be said out loud. Some things are better kept in places you can return to — through pages, songs, memories, and small details left behind on purpose.</p>
+      <p>So this became one of those places. A place made to hold a few things in one space — gratitude, effort, memory, and care.</p>
+      <p>Because some people leave more impact than they realize. Not always through big moments, but through small things that stay longer than expected.</p>
+      <p>And in another way, this is also part of learning. As someone learning in Sistem Informasi Jaringan dan Aplikasi, this became more than just a personal project. It became part of the process too — a way to learn by making something real.</p>
+      <p>So this is not only something made for her. It is also something made because of growth — hers, and maybe mine too.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== MEMORIES PAGE ======================== -->
+<div class="page" id="page-memories">
+  <div style="text-align:center; position:relative; z-index:2;">
+    <div class="section-title">memories</div>
+    <div class="section-sub">little things i still remember</div>
+    <div class="memories-icons">
+      <div class="mem-icon" onclick="openMemory('bread')">🍞</div>
+      <div class="mem-icon" onclick="openMemory('rose')">🌹</div>
+      <div class="mem-icon" onclick="openMemory('chocolate')">🍫</div>
+      <div class="mem-icon" onclick="openMemory('running')">🏃</div>
+      <div class="mem-icon" onclick="openMemory('music')">🎧</div>
+      <div class="mem-icon" onclick="openMemory('roblox')">🎮</div>
+    </div>
+  </div>
+</div>
+
+<!-- Memory Modal -->
+<div class="modal-overlay" id="memory-modal" onclick="closeModal(event)">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeModalDirect()">×</button>
+    <div class="modal-emoji" id="modal-emoji"></div>
+    <div class="modal-title" id="modal-title"></div>
+    <div class="prose" id="modal-content"></div>
+  </div>
+</div>
+
+<!-- ======================== MUSIC PAGE ======================== -->
+<div class="page" id="page-music">
+  <div class="content-page-inner">
+    <div class="section-title">do you remember this?</div>
+    <div class="section-sub">the one that took a while to understand</div>
+    <div class="music-card">
+      <div class="song-title">blessed</div>
+      <div class="song-artist">daniel caesar</div>
+      <div class="music-note-text" id="music-note-text" style="margin-top:0.8rem; margin-bottom:0;">
+        <span id="music-note-line"></span>
+      </div>
+      <div class="custom-player">
+        <div class="player-controls">
+          <button class="play-btn" id="play-btn" onclick="togglePlay()">▶</button>
+          <div class="progress-bar" id="progress-bar" onclick="seekAudio(event)">
+            <div class="progress-fill" id="progress-fill"></div>
+          </div>
+          <div class="time-label" id="time-label">0:00 / —</div>
+        </div>
+      </div>
+      <div style="font-size:0.72rem; color:var(--text-muted); text-align:center; margin-top:0.5rem;">add your audio file to hear the song ♪</div>
+    </div>
+    <div class="divider"></div>
+    <div class="prose">
+      <p>At first, I thought it was just a song. Just something nice to listen to, something calm, something soft. I didn't really get it at first. Not fully.</p>
+      <p>But after listening to it again, and again, and a little more carefully — I think I understand now. Maybe that was the point.</p>
+      <p>Maybe it was never just about the song, but about what it was trying to say quietly. And maybe that's why it stayed. Not because I understood it immediately, but because I understood it later. And somehow, that made it mean more.</p>
+      <p>So thank you. Not just for the song, but for the thought behind it. And even more for the gift. That was probably one of the most thoughtful things anyone has ever given me. Not because it had to be big, but because it was clear how much care was put into it.</p>
+      <p>You really didn't have to do all that. But you did. And I don't think you realize how much that meant to me.</p>
+      <p>So yeah — thank you. For the song, for the gift, and for caring enough to make it mean something.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== GAMES PAGE ======================== -->
+<div class="page" id="page-games">
+  <div class="content-page-inner">
+    <div class="section-title">play something first?</div>
+    <div class="section-sub">just so this doesn't get too serious.</div>
+    <div class="games-grid">
+      <div class="game-card" onclick="openGame('quiz')">
+        <div class="game-card-icon">🧠</div>
+        <div class="game-card-title">do i really know you?</div>
+        <div class="game-card-sub">multiple choice quiz</div>
+      </div>
+      <div class="game-card" onclick="openGame('guess')">
+        <div class="game-card-icon">🔍</div>
+        <div class="game-card-title">guess the memory</div>
+        <div class="game-card-sub">pick the right one</div>
+      </div>
+      <div class="game-card" onclick="openGame('tot')">
+        <div class="game-card-icon">⚡</div>
+        <div class="game-card-title">this or that</div>
+        <div class="game-card-sub">quick choices</div>
+      </div>
+      <div class="game-card" onclick="openGame('reverse')">
+        <div class="game-card-icon">🔄</div>
+        <div class="game-card-title">reverse quiz</div>
+        <div class="game-card-sub">how well do you know me?</div>
+      </div>
+      <div class="game-card" onclick="openGame('tap')">
+        <div class="game-card-icon">👆</div>
+        <div class="game-card-title">tap counter</div>
+        <div class="game-card-sub">times zahira lived in my head</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Game Modal -->
+<div class="modal-overlay" id="game-modal" onclick="closeGameModal(event)">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeGameModalDirect()">×</button>
+    <div class="game-inner" id="game-inner"></div>
+  </div>
+</div>
+
+<!-- ======================== STORY PAGE ======================== -->
+<div class="page" id="page-story">
+  <div class="content-page-inner">
+    <div class="section-title">akar</div>
+    <div class="section-sub">sebuah puisi</div>
+    <div class="poem-block">
+      <div class="poem-text">Tidak semua tumbuh
+memilih riuh.
+
+Sebagian menjelma akar—
+menembus gelap,
+memeluk luka tanah,
+lalu diam-diam menguat.
+
+Ia tak tepuk tangan,
+tak sorot lampu,
+tak nama yang dielu-elukan.
+
+Hanya sunyi
+yang setia menemaninya
+menjadi kuat
+tanpa perlu terlihat.
+
+Bukankah yang paling kokoh
+sering lahir dari
+hal-hal yang tak disaksikan?
+
+Badai datang
+membawa gaduh di bahunya,
+mengguncang dahan,
+merontokkan yang rapuh.
+
+Namun akar
+tak pandai berteriak.
+
+Ia hanya menggenggam bumi
+lebih dalam.
+
+Lelah kerap menjelma senja—
+redup,
+panjang,
+dan nyaris membuat pulang
+terasa seperti kalah.
+
+Ragu pun tumbuh
+seperti kabut:
+tipis,
+dingin,
+namun pandai
+mengaburkan arah.
+
+Tetapi langkah,
+betapapun kecil,
+tetaplah doa
+yang sedang berjalan.
+
+Ia mungkin lambat,
+namun tak sia-sia.
+
+Sebab waktu
+tak selalu melahirkan bunga
+di musim yang sama.
+
+Ada yang lebih dulu gugur
+untuk belajar tabah,
+ada yang lebih lama tumbuh
+untuk belajar kuat.
+
+Maka bila hari ini
+langitmu belum mekar,
+jangan buru-buru
+menamai dirimu gagal.
+
+Barangkali
+kau sedang menjadi akar—
+
+ditanam dalam gelap
+agar kelak
+mampu menahan
+badai yang lebih besar.
+
+Dan bukankah
+yang berakhir indah
+bukan mereka
+yang paling cepat berbunga,
+
+melainkan mereka
+yang paling sabar
+bertumbuh
+di dalam sunyi.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== SECRET PAGE ======================== -->
+<div class="page" id="page-secret">
+  <div class="secret-inner" id="secret-inner">
+    <!-- filled by JS -->
+  </div>
+</div>
+
+<!-- ======================== GRADUATION PAGE ======================== -->
+<div class="page" id="page-graduation">
+  <div class="content-page-inner">
+    <div class="section-title">you made it.</div>
+    <div class="section-sub">congratulations on graduating from smpn 282</div>
+    <div class="divider"></div>
+    <div class="prose">
+      <p>You made it. After everything — the long days, the pressure, the tiredness, the things people saw, and the things they probably didn't — you still made it here. And I hope you know that's something to be proud of.</p>
+      <p>Not just because you finished middle school, but because of everything it took to get here. Because growing up is not always easy. And still, somehow, you kept going.</p>
+      <p>So yes, I'm proud of you. Really proud. Proud of how far you've come. Proud of how much you've grown. Proud of the person you're becoming.</p>
+      <p>And maybe this is only one ending, but it's also the start of something bigger. A new place. New people. New stories waiting for you.</p>
+      <p>I hope the next place welcomes you kindly. I hope you get into the high school you've been hoping for. I hope what comes next is good to you.</p>
+      <p>And more than anything, I hope you keep becoming someone you can be proud of too.</p>
+      <p>May what's ahead be kind. May your days be lighter. May your efforts be rewarded. May your heart stay soft. And may good things find you, again and again.</p>
+      <p>You've done well. And I hope life gives you even more reasons to smile from here.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== FUTURE PAGE ======================== -->
+<div class="page" id="page-future">
+  <div class="content-page-inner">
+    <div class="section-title">for your later days</div>
+    <div class="section-sub">for whatever version of you reads this later</div>
+    <div class="divider"></div>
+    <div class="prose">
+      <p>I hope life feels gentler.</p>
+      <p>I hope you're happy. Not loudly. Not perfectly. Just truly.</p>
+      <p>I hope your days feel lighter. I hope your mind feels quieter. I hope your heart feels less heavy.</p>
+      <p>I hope you're healthy. I hope you're resting enough. I hope life has been kind to you in the ways that matter.</p>
+      <p>I hope the things you once worried about have become smaller now. I hope the things you once dreamed about have started finding their way to you.</p>
+      <p>I hope you still laugh easily. I hope soft things still make you smile. I hope you still let yourself be cared for.</p>
+      <p>And wherever life takes you, I hope it takes you somewhere warm. Somewhere safe. Somewhere good.</p>
+      <p>And if one day everything changes, if life gets busy, if time gets farther, if things become harder to hold — I still hope, somehow, you remember me a little.</p>
+      <p>Not in a heavy way. Not in a sad way. Just enough to smile once, and think, <em>"oh right. that was nice."</em></p>
+      <p>That would be enough.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== THANK YOU PAGE ======================== -->
+<div class="page" id="page-thankyou">
+  <div class="content-page-inner">
+    <div class="section-title">thank you, truly</div>
+    <div class="section-sub">for all the little things</div>
+    <div class="divider"></div>
+    <div class="prose">
+      <p>Thank you. For all the effort, for all the little things, and for all the care you probably thought was small, but never really felt small to me.</p>
+      <p>I don't think you realize how much I noticed. The way you remembered things. The way you gave effort even in small moments. The way you cared in quiet ways that were easy to miss if no one was paying attention.</p>
+      <p>But I was. And I noticed more than I probably ever said.</p>
+      <p>That's why this page exists. Because some things deserve to be thanked properly. And maybe this is one of them.</p>
+      <p>Thank you for the time. For the thought. For the attention. For the care that always felt more genuine than loud.</p>
+      <p>Thank you for the things you did without needing credit for them. For the little gestures. For the effort behind things that could have easily been simple, but somehow never were when it came from you.</p>
+      <p>You always had this quiet way of making things mean more than they looked. And maybe that is one of the things I appreciated most. Not because everything had to be big. But because even the smallest things from you always felt intentional.</p>
+      <p>And that mattered. More than I think you know.</p>
+      <p>Some people leave big impressions. You left careful ones. And somehow, those stay longer.</p>
+      <p>So thank you. For all of it. More than I ever said, and probably more than you realized.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== FIRST IMPRESSION PAGE ======================== -->
+<div class="page" id="page-impression">
+  <div class="content-page-inner">
+    <div class="section-title">before i knew you better</div>
+    <div class="section-sub">this is just me trying to understand you better.</div>
+    <div class="prose" style="margin-bottom:2rem;">
+      <p>Kesan pertama itu nggak selalu langsung jelas. Kadang keliatan biasa aja dari luar, tapi semakin lama kamu kenal seseorang, semakin banyak hal yang baru kelihatan.</p>
+      <p>Awalnya, kamu keliatan seperti orang yang tenang. Nggak banyak ngomong, tapi setiap kali ngomong selalu ada yang bisa diinget. Ada hal-hal kecil yang pelan-pelan mulai kerasa, dan itu yang akhirnya bikin kamu nggak gampang dilupain.</p>
+      <p>Ternyata beda setelah kenal. Banyak hal yang nggak keliatan dari luar — cara kamu perhatiin hal kecil, cara kamu care tanpa perlu bilang langsung. Dan entah kenapa, justru itu yang paling nempel lama.</p>
+    </div>
+    <div class="divider"></div>
+    <div style="margin-bottom:1.5rem;">
+      <div class="section-sub" style="margin-bottom:1rem;">quick questions</div>
+      <div id="qna-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ======================== ENDING PAGE ======================== -->
+<div class="page" id="page-ending">
+  <div class="ending-inner">
+    <div class="ending-date">— 2025 —</div>
+    <div class="ending-name">Zaquchi</div>
+    <div class="ending-subtitle">— only for my zaquchi —</div>
+    <div class="prose" style="text-align:center; margin-bottom:2rem;">
+      <p>It started as a name I made from yours. A small one. A weird one, maybe. But one that stayed.</p>
+    </div>
+    <div class="ending-meaning">
+      <span>ZA</span>hira &nbsp;&nbsp;
+      <span>QU</span>raisya &nbsp;&nbsp;
+      <span>CH</span>elsea &nbsp;&nbsp;
+      <span>I</span>riadi
+    </div>
+    <div class="prose" style="text-align:center; margin-top:2rem;">
+      <p>Somewhere along the way, that became the name I got used to carrying for you. The one that felt a little more special because it was only mine to call you.</p>
+      <p>Maybe it's silly. Maybe it's strange. But this was the meaning I quietly made for you.</p>
+      <p style="color:var(--accent-soft); font-style:italic;">And maybe that's why it stayed.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ======================== PARTICLES ========================
+const canvas = document.getElementById('particles-canvas');
+const ctx = canvas.getContext('2d');
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+window.addEventListener('resize', () => {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+});
+const particles = Array.from({length: 50}, () => ({
+  x: Math.random() * canvas.width,
+  y: Math.random() * canvas.height,
+  r: Math.random() * 1.2 + 0.3,
+  vx: (Math.random() - 0.5) * 0.15,
+  vy: (Math.random() - 0.5) * 0.15,
+  o: Math.random() * 0.3 + 0.05
+}));
+function animateParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  particles.forEach(p => {
+    p.x += p.vx; p.y += p.vy;
+    if (p.x < 0) p.x = canvas.width;
+    if (p.x > canvas.width) p.x = 0;
+    if (p.y < 0) p.y = canvas.height;
+    if (p.y > canvas.height) p.y = 0;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.r, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(142,197,255,${p.o})`;
+    ctx.fill();
+  });
+  requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+// ======================== PAGE SYSTEM ========================
+let currentPage = 'intro';
+let pageHistory = [];
+
+function goToPage(id) {
+  const current = document.querySelector('.page.active');
+  if (current) {
+    current.classList.remove('active');
+    pageHistory.push(current.id.replace('page-', ''));
+  }
+  const next = document.getElementById('page-' + id);
+  if (next) {
+    next.classList.add('active');
+    currentPage = id;
+  }
+  const backBtn = document.getElementById('back-btn');
+  const starEl = document.getElementById('secret-star');
+  if (['intro','question','password'].includes(id)) {
+    backBtn.classList.remove('show');
+    starEl.classList.remove('show');
+  } else if (id === 'hub') {
+    backBtn.classList.remove('show');
+    starEl.classList.add('show');
+  } else {
+    backBtn.classList.add('show');
+    if (id !== 'secret') starEl.classList.add('show');
+  }
+  // Trigger page-specific init
+  if (id === 'hub') initHub();
+  if (id === 'secret') initSecret();
+  if (id === 'impression') initQNA();
+}
+
+function goBack() {
+  if (pageHistory.length > 0) {
+    const prev = pageHistory.pop();
+    const current = document.querySelector('.page.active');
+    if (current) current.classList.remove('active');
+    const prevPage = document.getElementById('page-' + prev);
+    if (prevPage) {
+      prevPage.classList.add('active');
+      currentPage = prev;
+    }
+    const backBtn = document.getElementById('back-btn');
+    const starEl = document.getElementById('secret-star');
+    if (['intro','question','password'].includes(prev)) {
+      backBtn.classList.remove('show');
+      starEl.classList.remove('show');
+    } else if (prev === 'hub') {
+      backBtn.classList.remove('show');
+      starEl.classList.add('show');
+    } else {
+      backBtn.classList.add('show');
+    }
+  }
+}
+
+// ======================== INTRO ========================
+window.addEventListener('load', () => {
+  const lines = document.querySelectorAll('.intro-line');
+  lines.forEach(line => {
+    const delay = parseInt(line.dataset.delay);
+    setTimeout(() => line.classList.add('visible'), delay);
+  });
+  setTimeout(() => {
+    document.getElementById('intro-continue').classList.add('show');
+  }, 4800);
+});
+
+// ======================== QUESTION PAGE ========================
+let noClickCount = 0;
+function handleYes() {
+  goToPage('password');
+}
+function handleNo() {
+  noClickCount++;
+  const btn = document.getElementById('btn-no');
+  if (noClickCount >= 4) {
+    btn.textContent = 'ga salah lagi kan?';
+    btn.onclick = handleYes;
+    return;
+  }
+  // Move button to random position
+  const container = document.getElementById('question-btns');
+  const rect = container.getBoundingClientRect();
+  const maxX = Math.min(window.innerWidth - 120, 200);
+  const maxY = 60;
+  const rx = (Math.random() - 0.5) * maxX;
+  const ry = (Math.random() - 0.5) * maxY;
+  btn.style.position = 'absolute';
+  btn.style.left = (150 + rx) + 'px';
+  btn.style.top = (30 + ry) + 'px';
+  btn.style.zIndex = '10';
+}
+
+// ======================== PASSWORD PAGE ========================
+let pwAttempts = 0;
+const hints = ['jahat', 'english', '4 huruf… seriusan gatau? jahat banget kamu'];
+
+function checkPassword() {
+  const input = document.getElementById('pw-input');
+  const hint = document.getElementById('pw-hint');
+  const success = document.getElementById('pw-success');
+  if (input.value.toLowerCase() === 'liar') {
+    hint.textContent = '';
+    success.textContent = 'okeii gudd — tapi… jangan lakuin itu ya 🙂';
+    success.style.opacity = '1';
+    input.disabled = true;
+    setTimeout(() => goToPage('hub'), 1800);
+  } else if (input.value.length === 4 && input.value.toLowerCase() !== 'liar') {
+    pwAttempts++;
+    if (pwAttempts <= hints.length) {
+      hint.textContent = hints[pwAttempts - 1];
+    }
+    input.value = '';
+  }
+}
+
+// ======================== HUB ========================
+function initHub() {
+  const items = document.querySelectorAll('.hub-item');
+  items.forEach((item, i) => {
+    item.style.opacity = '0';
+    item.style.transform = 'translateY(15px)';
+    setTimeout(() => {
+      item.style.transition = 'opacity 0.6s ease, transform 0.6s ease, color 0.3s, letter-spacing 0.3s, text-shadow 0.3s';
+      item.style.opacity = '1';
+      item.style.transform = 'translateY(0)';
+    }, 100 + i * 80);
+  });
+}
+
+// ======================== MEMORIES ========================
+const memData = {
+  bread: {
+    emoji: '🍞',
+    title: 'bread',
+    content: `This is actually such a small thing, but I still remember it.\n\nBack then, I wanted to celebrate my birthday in a simple way. Nothing big, nothing loud. I just wanted to hand out bread to people who needed it. That was it.\n\nAnd honestly, the first person I wanted to ask was you. It just felt like it would've been nice — walking around and handing out bread with you. Simple, but probably one of those memories I would've kept for a long time.\n\nBut in the end, I didn't ask you. Not because I didn't want to. Honestly, it was because I wanted to too much.\n\nI was scared it would make you feel like you had to celebrate me, when that was never what I meant. So I asked someone else instead.\n\nIt still happened, the bread was still handed out, everything still went fine. But yeah… there's still a small part of me that thinks, "it should've been with you."`
+  },
+  rose: {
+    emoji: '🌹',
+    title: 'rose',
+    content: `I actually liked Rose a long time ago. But it was just a casual kind of liking. Nothing serious.\n\nThen you came around, and somehow made me like her again. But this time, it felt different. I started understanding why people liked her so much, started noticing the smaller things, started thinking, "oh… okay, now I get it."\n\nAnd weirdly, it wasn't just about Rose. Somehow, because of you, the way I looked at other things started changing too. Things that used to feel ordinary started feeling more interesting when I looked a little closer.\n\nSo yeah… you didn't just make me like Rose again, you kind of changed the way I see things too.`
+  },
+  chocolate: {
+    emoji: '🍫',
+    title: 'chocolate',
+    content: `I like chocolate.\n\nBut obviously, it feels different when I buy it myself. What made it special was the fact that it came from you. That's really it.\n\nAnd honestly, even if it wasn't chocolate, I probably still would've kept it carefully anyway. Because the point was never the thing itself. It was the fact that you gave it to me.\n\nSo yeah, whether it was chocolate, candy, paper, or literally anything else… it still would've felt special. Kind of annoying, but okay.`
+  },
+  running: {
+    emoji: '🏃',
+    title: 'running',
+    content: `I don't know why, but every time I see someone running, I think of you. Probably because you always made it very clear just how much you liked it.`
+  },
+  music: {
+    emoji: '🎧',
+    title: 'music',
+    content: `There are songs that are way more fun to listen to now, even though they used to feel normal to me.\n\nMostly because I like listening to our playlist, and now those songs always remind me of you.`
+  },
+  roblox: {
+    emoji: '🎮',
+    title: 'roblox',
+    content: `This game is fun, honestly. The one game that somehow became a connection.\n\nBack then it was Free Fire too, yeah. And somehow I was a burden in both.\n\nThat's why we're playing ML next, okay? We'll play together. I promise I won't be a burden this time.`
+  }
+};
+
+function openMemory(key) {
+  const d = memData[key];
+  document.getElementById('modal-emoji').textContent = d.emoji;
+  document.getElementById('modal-title').textContent = d.title;
+  document.getElementById('modal-content').innerHTML = d.content.split('\n\n').map(p=>`<p>${p}</p>`).join('');
+  document.getElementById('memory-modal').classList.add('open');
+}
+function closeModal(e) {
+  if (e.target === document.getElementById('memory-modal')) closeModalDirect();
+}
+function closeModalDirect() {
+  document.getElementById('memory-modal').classList.remove('open');
+}
+
+// ======================== MUSIC PLAYER ========================
+let isPlaying = false;
+let audioEl = null;
+const musicNoteLines = [
+  'i didn\'t know the song at first…',
+  'turns out this was why you gave me this song',
+  'i just understood it later'
+];
+let noteIdx = 0;
+function cycleMusicNote() {
+  document.getElementById('music-note-line').style.opacity = '0';
+  setTimeout(() => {
+    document.getElementById('music-note-line').textContent = musicNoteLines[noteIdx % musicNoteLines.length];
+    document.getElementById('music-note-line').style.transition = 'opacity 0.7s';
+    document.getElementById('music-note-line').style.opacity = '1';
+    noteIdx++;
+  }, 400);
+}
+cycleMusicNote();
+setInterval(cycleMusicNote, 4000);
+
+function togglePlay() {
+  const btn = document.getElementById('play-btn');
+  if (!audioEl) {
+    btn.textContent = '⏸';
+    // Simulate progress for demo
+    simulateProgress();
+    return;
+  }
+  if (isPlaying) {
+    audioEl.pause(); btn.textContent = '▶';
+  } else {
+    audioEl.play(); btn.textContent = '⏸';
+  }
+  isPlaying = !isPlaying;
+}
+
+let simInterval = null;
+let simTime = 0;
+function simulateProgress() {
+  isPlaying = true;
+  clearInterval(simInterval);
+  simInterval = setInterval(() => {
+    simTime += 0.5;
+    const dur = 220;
+    const pct = (simTime / dur) * 100;
+    document.getElementById('progress-fill').style.width = Math.min(pct, 100) + '%';
+    const m = Math.floor(simTime / 60);
+    const s = Math.floor(simTime % 60).toString().padStart(2,'0');
+    document.getElementById('time-label').textContent = `${m}:${s} / 3:40`;
+    if (simTime >= dur) {
+      clearInterval(simInterval);
+      isPlaying = false;
+      document.getElementById('play-btn').textContent = '▶';
+      simTime = 0;
+    }
+  }, 500);
+  document.getElementById('play-btn').onclick = () => {
+    if (isPlaying) {
+      clearInterval(simInterval); isPlaying = false;
+      document.getElementById('play-btn').textContent = '▶';
+    } else {
+      simulateProgress();
+      document.getElementById('play-btn').textContent = '⏸';
+    }
+  };
+}
+
+// ======================== GAMES ========================
+const quizData = [
+  {
+    q: 'what color does she like most?',
+    opts: ['red', 'blue', 'yellow', 'pink'],
+    correct: 'blue',
+    feedbackCorrect: 'okay good, at least you pay attention',
+    feedbackWrong: 'wrong. do better.'
+  },
+  {
+    q: 'what game is basically attached to her?',
+    opts: ['valorant', 'roblox', 'genshin', 'minecraft'],
+    correct: 'roblox',
+    feedbackCorrect: 'yep. that one.',
+    feedbackWrong: 'nope. think again.'
+  },
+  {
+    q: 'what does she like more?',
+    opts: ['running', 'sleeping', 'gaming', 'cooking'],
+    correct: 'running',
+    feedbackCorrect: 'see, you do know things.',
+    feedbackWrong: "wrong. she'd be disappointed."
+  }
+];
+const guessData = [
+  {
+    clue: 'something simple, but i still think it should\'ve been with you',
+    opts: ['bread', 'music', 'running'],
+    correct: 'bread',
+    feedbackCorrect: 'yeah. still remember that one.',
+    feedbackWrong: 'nope. but nice try.'
+  },
+  {
+    clue: 'the one that changed the way i see things',
+    opts: ['rose', 'chocolate', 'roblox'],
+    correct: 'rose',
+    feedbackCorrect: 'exactly that one.',
+    feedbackWrong: 'not quite.'
+  },
+  {
+    clue: 'wasn\'t about what it was, but who gave it',
+    opts: ['music', 'chocolate', 'bread'],
+    correct: 'chocolate',
+    feedbackCorrect: 'kind of annoying, but okay.',
+    feedbackWrong: 'guess again next time.'
+  }
+];
+const totData = [
+  { a: 'rose', b: 'jennie', feedA: 'yeah, that feels right.', feedB: 'interesting choice.' },
+  { a: 'night', b: 'morning', feedA: 'same.', feedB: 'morning person? bold.' },
+  { a: 'roblox', b: 'mobile legends', feedA: 'okay that\'s on brand.', feedB: 'we\'re playing this next, remember?' },
+  { a: 'blue', b: 'black', feedA: 'yeah, that feels right.', feedB: 'dark. noted.' },
+  { a: 'quiet', b: 'chaotic', feedA: 'makes sense.', feedB: 'bold choice. suspicious, but bold.' }
+];
+const reverseData = [
+  {
+    q: 'what do i think about too much?',
+    opts: ['sleep', 'school', 'you'],
+    feed: 'correct. somehow still you.'
+  },
+  {
+    q: 'what ruins my focus fastest?',
+    opts: ['noise', 'overthinking', 'you again'],
+    feed: 'all roads lead to the same answer.'
+  },
+  {
+    q: 'what do i randomly bring up to my friends?',
+    opts: ['homework', 'food', 'you, apparently'],
+    feed: 'yeah. apparently.'
+  }
+];
+
+let gameState = {};
+
+function openGame(type) {
+  gameState = { type, idx: 0, score: 0, tapCount: 0, totIdx: 0 };
+  const modal = document.getElementById('game-modal');
+  modal.classList.add('open');
+  renderGame(type);
+}
+function closeGameModal(e) {
+  if (e.target === document.getElementById('game-modal')) closeGameModalDirect();
+}
+function closeGameModalDirect() {
+  document.getElementById('game-modal').classList.remove('open');
+}
+
+function renderGame(type) {
+  const inner = document.getElementById('game-inner');
+  if (type === 'quiz') renderQuiz(inner);
+  else if (type === 'guess') renderGuess(inner);
+  else if (type === 'tot') renderToT(inner);
+  else if (type === 'reverse') renderReverse(inner);
+  else if (type === 'tap') renderTap(inner);
+}
+
+function renderQuiz(inner) {
+  const q = quizData[gameState.idx];
+  if (!q) {
+    inner.innerHTML = `<div style="text-align:center; padding:2rem;">
+      <div class="game-question" style="font-size:1.5rem;">score: ${gameState.score}/${quizData.length}</div>
+      <div class="prose" style="text-align:center; margin-top:1rem;">
+        ${gameState.score === quizData.length ? 'okay you actually pay attention.' : 'room for improvement. but okay.'}
+      </div>
+    </div>`;
+    return;
+  }
+  inner.innerHTML = `
+    <div class="game-question">${q.q}</div>
+    <div class="game-options">
+      ${q.opts.map(o => `<button class="game-opt" onclick="answerQuiz('${o}')">${o}</button>`).join('')}
+    </div>
+    <div class="game-feedback" id="g-feedback"></div>
+    <button class="game-next-btn" id="g-next" onclick="nextQuiz()">next →</button>
+    <div style="font-size:0.72rem; color:var(--text-muted); text-align:right; margin-top:0.5rem;">${gameState.idx+1}/${quizData.length}</div>
+  `;
+}
+function answerQuiz(ans) {
+  const q = quizData[gameState.idx];
+  const fb = document.getElementById('g-feedback');
+  if (ans === q.correct) {
+    gameState.score++;
+    fb.textContent = q.feedbackCorrect;
+  } else {
+    fb.textContent = q.feedbackWrong;
+  }
+  fb.classList.add('show');
+  document.querySelectorAll('.game-opt').forEach(b => b.disabled = true);
+  document.getElementById('g-next').classList.add('show');
+}
+function nextQuiz() {
+  gameState.idx++;
+  renderQuiz(document.getElementById('game-inner'));
+}
+
+function renderGuess(inner) {
+  const q = guessData[gameState.idx];
+  if (!q) {
+    inner.innerHTML = `<div style="text-align:center; padding:2rem;">
+      <div class="game-question">done. you know the memories.</div>
+    </div>`;
+    return;
+  }
+  inner.innerHTML = `
+    <div class="game-question" style="font-size:1rem; font-style:normal; margin-bottom:0.4rem; color:var(--text-muted);">clue:</div>
+    <div class="game-question">"${q.clue}"</div>
+    <div class="game-options">
+      ${q.opts.map(o => `<button class="game-opt" onclick="answerGuess('${o}')">${o}</button>`).join('')}
+    </div>
+    <div class="game-feedback" id="g-feedback"></div>
+    <button class="game-next-btn" id="g-next" onclick="nextGuess()">next →</button>
+  `;
+}
+function answerGuess(ans) {
+  const q = guessData[gameState.idx];
+  const fb = document.getElementById('g-feedback');
+  fb.textContent = ans === q.correct ? q.feedbackCorrect : q.feedbackWrong;
+  fb.classList.add('show');
+  document.querySelectorAll('.game-opt').forEach(b => b.disabled = true);
+  document.getElementById('g-next').classList.add('show');
+}
+function nextGuess() { gameState.idx++; renderGuess(document.getElementById('game-inner')); }
+
+function renderToT(inner) {
+  const item = totData[gameState.totIdx];
+  if (!item) {
+    inner.innerHTML = `<div style="text-align:center; padding:2rem;"><div class="game-question">that's it. you know yourself.</div></div>`;
+    return;
+  }
+  inner.innerHTML = `
+    <div class="game-question" style="margin-bottom:1.5rem;">${gameState.totIdx + 1} / ${totData.length}</div>
+    <div class="tot-pair">
+      <button class="tot-btn" onclick="answerToT('a')">${item.a}</button>
+      <button class="tot-btn" onclick="answerToT('b')">${item.b}</button>
+    </div>
+    <div class="game-feedback" id="g-feedback"></div>
+    <button class="game-next-btn" id="g-next" onclick="nextToT()">next →</button>
+  `;
+}
+function answerToT(side) {
+  const item = totData[gameState.totIdx];
+  const fb = document.getElementById('g-feedback');
+  fb.textContent = side === 'a' ? item.feedA : item.feedB;
+  fb.classList.add('show');
+  document.querySelectorAll('.tot-btn').forEach(b => b.disabled = true);
+  document.getElementById('g-next').classList.add('show');
+}
+function nextToT() { gameState.totIdx++; renderToT(document.getElementById('game-inner')); }
+
+function renderReverse(inner) {
+  const q = reverseData[gameState.idx];
+  if (!q) {
+    inner.innerHTML = `<div style="text-align:center; padding:2rem;"><div class="game-question">okay. you get the point.</div></div>`;
+    return;
+  }
+  inner.innerHTML = `
+    <div class="game-question">${q.q}</div>
+    <div class="game-options">
+      ${q.opts.map(o => `<button class="game-opt" onclick="answerReverse('${o}')">${o}</button>`).join('')}
+    </div>
+    <div class="game-feedback" id="g-feedback"></div>
+    <button class="game-next-btn" id="g-next" onclick="nextReverse()">next →</button>
+  `;
+}
+function answerReverse(ans) {
+  const q = reverseData[gameState.idx];
+  const fb = document.getElementById('g-feedback');
+  fb.textContent = q.feed;
+  fb.classList.add('show');
+  document.querySelectorAll('.game-opt').forEach(b => b.disabled = true);
+  document.getElementById('g-next').classList.add('show');
+}
+function nextReverse() { gameState.idx++; renderReverse(document.getElementById('game-inner')); }
+
+function renderTap(inner) {
+  const tapFeedback = ['', 'that was fast', 'okay this is getting obvious', '', '', 'you\'re kind of everywhere', '', '', '', '', '', '', 'this is concerning', '', '', '', '', '', '', '', 'yeah alright i get it'];
+  inner.innerHTML = `
+    <div style="text-align:center;">
+      <div style="font-family:'Cormorant Garamond',serif; font-size:0.9rem; font-style:italic; color:var(--text-muted); margin-bottom:1rem;">times zahira lived in my head today</div>
+      <div class="tap-number" id="tap-num">0</div>
+      <div class="game-feedback show" id="tap-feed" style="margin-top:0.5rem;">tap to count</div>
+      <div style="display:flex; justify-content:center; margin-top:1rem;">
+        <button class="tap-btn" onclick="doTap()">💭</button>
+      </div>
+    </div>
+  `;
+  gameState.tapCount = 0;
+}
+function doTap() {
+  gameState.tapCount++;
+  const num = document.getElementById('tap-num');
+  num.textContent = gameState.tapCount;
+  num.classList.add('pop');
+  setTimeout(() => num.classList.remove('pop'), 100);
+  const feeds = ['', 'that was fast', 'okay this is getting obvious', 'hm.', 'again?', 'you\'re kind of everywhere', 'still going?', 'okay.', 'noted.', 'can\'t stop huh', 'same honestly', 'yeah alright', 'this is concerning', 'but also relatable', 'okay i\'ll stop judging', 'nope still judging', 'this is a lot', 'genuinely a lot', 'just saying', 'yeah alright i get it', 'same tbh'];
+  const feed = document.getElementById('tap-feed');
+  const idx = Math.min(gameState.tapCount, feeds.length - 1);
+  if (feeds[idx]) feed.textContent = feeds[idx];
+}
+
+// ======================== SECRET PAGE ========================
+function initSecret() {
+  const lines = [
+    { text: 'you found this…', delay: 500 },
+    { text: 'berarti kamu orang yang merhatiin hal kecil', delay: 2200 },
+    { text: 'dan mungkin itu alasan kenapa kamu berarti buat aku', delay: 4200 },
+    { text: 'PHOTO', delay: 6000 },
+    { text: 'aku ga selalu nunjukin semuanya', delay: 8200 },
+    { text: 'tapi aku peduli', delay: 10000 },
+    { text: 'stay with me', delay: 12200, final: true }
+  ];
+
+  const inner = document.getElementById('secret-inner');
+  inner.innerHTML = '';
+
+  lines.forEach(l => {
+    if (l.text === 'PHOTO') {
+      const ph = document.createElement('div');
+      ph.className = 'secret-photo';
+      ph.innerHTML = '🌙';
+      ph.id = 'secret-photo';
+      inner.appendChild(ph);
+      setTimeout(() => ph.classList.add('visible'), l.delay);
+    } else {
+      const el = document.createElement('div');
+      el.className = 'secret-line' + (l.final ? ' final' : '');
+      el.textContent = l.text;
+      inner.appendChild(el);
+      setTimeout(() => el.classList.add('visible'), l.delay);
+    }
+  });
+}
+
+// ======================== QNA ========================
+const qnaData = [
+  { q: 'did i get you right at first?', feedYes: 'thought so.', feedNo: 'yeah, i figured you\'d say that.' },
+  { q: 'are you easier to understand than you seem?', feedYes: 'maybe.', feedNo: 'i know. still trying.' },
+  { q: 'do you know you\'re hard not to notice?', feedYes: 'of course you do.', feedNo: 'you should.' },
+  { q: 'were you always this easy to remember?', feedYes: 'yeah. that checks out.', feedNo: 'then why do i still remember everything.' },
+  { q: 'do you realize people notice more than you think?', feedYes: 'good. then you know.', feedNo: 'they do. i do.' }
+];
+
+function initQNA() {
+  const list = document.getElementById('qna-list');
+  list.innerHTML = '';
+  qnaData.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'qna-item';
+    div.innerHTML = `
+      <div class="qna-q">${item.q}</div>
+      <div class="qna-btns">
+        <button class="qna-btn" onclick="answerQNA(${i}, 'yes')">yes</button>
+        <button class="qna-btn" onclick="answerQNA(${i}, 'no')">no</button>
+      </div>
+      <div class="qna-response" id="qna-res-${i}"></div>
+    `;
+    list.appendChild(div);
+  });
+}
+function answerQNA(i, ans) {
+  const item = qnaData[i];
+  const res = document.getElementById('qna-res-' + i);
+  res.textContent = ans === 'yes' ? item.feedYes : item.feedNo;
+  res.classList.add('show');
+}
+</script>
+</body>
+</html>
