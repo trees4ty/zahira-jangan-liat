@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>ZaQuChi World</title>
+  <!-- Font & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', 'Poppins', sans-serif;
+      background: #0b0e14;
+      color: #eef4ff;
+      height: 100vh;
+      overflow: hidden;
+      touch-action: pan-y; 
+    }
+
+    #app {
+      position: relative;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    .scene {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.8s ease, visibility 0.8s;
+      background: #0b0e14;
+      overflow-y: auto;
+    }
+
+    .scene.active {
+      opacity: 1;
+      visibility: visible;
+      z-index: 10;
+    }
+
+    /* Scroll hanya untuk story */
+    .scene.story-active {
+      overflow-y: auto;
+      justify-content: flex-start;
+      padding-top: 48px;
+    }
+
+    /* Typography */
+    h1, h2, p {
+      text-align: center;
+      font-weight: 300;
+      line-height: 1.6;
+    }
+
+    .text-glow {
+      color: #a0c4ff;
+      font-weight: 600;
+      text-shadow: 0 0 8px rgba(160,196,255,0.5);
+    }
+
+    button {
+      background: rgba(30, 40, 60, 0.7);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(160,196,255,0.3);
+      color: #eef4ff;
+      padding: 12px 28px;
+      border-radius: 40px;
+      font-size: 1.1rem;
+      font-weight: 400;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin: 8px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    button:hover {
+      background: #a0c4ff;
+      color: #0b0e14;
+      border-color: #a0c4ff;
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 1px solid #a0c4ff;
+      color: #a0c4ff;
+    }
+
+    input {
+      background: rgba(20,30,45,0.9);
+      border: 1px solid #a0c4ff;
+      color: white;
+      padding: 14px 18px;
+      border-radius: 30px;
+      width: 80%;
+      max-width: 280px;
+      font-size: 1rem;
+      text-align: center;
+      margin: 20px 0;
+      outline: none;
+    }
+
+    /* Menu grid */
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      width: 100%;
+      max-width: 360px;
+      margin-top: 32px;
+    }
+
+    .menu-item {
+      background: rgba(25, 35, 55, 0.7);
+      backdrop-filter: blur(4px);
+      padding: 20px 8px;
+      border-radius: 24px;
+      text-align: center;
+      border: 1px solid rgba(160,196,255,0.2);
+      transition: transform 0.2s;
+      cursor: pointer;
+    }
+
+    /* Foto fullscreen overlay */
+    .fullscreen-photo {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      object-fit: cover;
+      z-index: -1;
+      opacity: 0.35;
+      filter: brightness(0.6);
+    }
+
+    /* Animasi ketik */
+    .typewriter {
+      font-family: monospace;
+      border-right: 2px solid #a0c4ff;
+      white-space: nowrap;
+      overflow: hidden;
+      margin: 0 auto;
+      letter-spacing: 2px;
+      animation: blinkCursor 0.8s infinite;
+    }
+    @keyframes blinkCursor {
+      0%,100% { border-color: #a0c4ff; }
+      50% { border-color: transparent; }
+    }
+
+    /* Fade in text sequence */
+    .fade-text {
+      opacity: 0;
+      animation: fadeInText 2s forwards;
+    }
+    .delay-1 { animation-delay: 1s; }
+    .delay-2 { animation-delay: 3s; }
+    .delay-3 { animation-delay: 5s; }
+    .delay-4 { animation-delay: 8s; }
+    .delay-5 { animation-delay: 10s; }
+    .delay-6 { animation-delay: 12s; }
+    .delay-7 { animation-delay: 14s; }
+    @keyframes fadeInText {
+      to { opacity: 1; }
+    }
+
+    /* Game card */
+    .game-card {
+      background: #1a2332;
+      border-radius: 20px;
+      padding: 16px;
+      margin: 12px 0;
+      width: 100%;
+    }
+
+    /* Tombol back */
+    .back-btn {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: none;
+      border: none;
+      color: #a0c4ff;
+      font-size: 1.5rem;
+      padding: 8px;
+      box-shadow: none;
+    }
+
+    /* Youtube embed hidden */
+    #youtube-player {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 1px;
+      height: 1px;
+      opacity: 0;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <!-- Background foto untuk hub (bisa diganti) -->
+  <img src="https://picsum.photos/800/1200?grayscale&blur=2" class="fullscreen-photo" id="bg-photo" style="display: none;">
+
+  <!-- SCENE 1: OPENING -->
+  <section id="opening" class="scene active">
+    <div style="text-align: center;">
+      <div id="typewriter-text" style="font-size: 1.8rem; min-height: 4rem;"></div>
+      <button id="start-btn" style="display: none; margin-top: 40px;">▶ mulai</button>
+    </div>
+  </section>
+
+  <!-- SCENE 2: QUESTION -->
+  <section id="question" class="scene">
+    <h2 style="font-size: 2.2rem; margin-bottom: 40px;">kamu sayang aku gak?</h2>
+    <div style="display: flex; gap: 20px;">
+      <button id="iya-btn">iya</button>
+      <button id="tidak-btn" style="position: relative;">tidak</button>
+    </div>
+    <p id="hint-msg" style="margin-top: 24px; color: #ffb3b3;"></p>
+  </section>
+
+  <!-- SCENE 3: PASSWORD -->
+  <section id="password" class="scene">
+    <h2>sebelum masuk, passwordnya apa?</h2>
+    <input type="text" id="password-input" placeholder="ketik di sini" autocomplete="off">
+    <div style="display: flex; gap: 10px;">
+      <button id="submit-pw">buka</button>
+      <button id="hint-btn" class="btn-outline">hint</button>
+    </div>
+    <p id="hint-display" style="margin-top: 20px; opacity: 0.8;"></p>
+    <p id="pw-error" style="color: #ff8a8a;"></p>
+  </section>
+
+  <!-- SCENE 4: HUB (Menu Utama) -->
+  <section id="hub" class="scene">
+    <h1 style="font-size: 2.5rem; margin-bottom: 8px; z-index: 2;">ZaQuChi</h1>
+    <p style="z-index: 2; opacity: 0.9;">✨ welcome to our little world ✨</p>
+    <div class="menu-grid" style="z-index: 2;">
+      <div class="menu-item" data-target="profile"><i class="fas fa-user"></i> PROFILE</div>
+      <div class="menu-item" data-target="memories"><i class="fas fa-brain"></i> MEMORIES</div>
+      <div class="menu-item" data-target="music"><i class="fas fa-music"></i> MUSIC</div>
+      <div class="menu-item" data-target="games"><i class="fas fa-gamepad"></i> GAMES</div>
+      <div class="menu-item" data-target="hidden" style="grid-column: span 2;"><i class="fas fa-moon"></i> 🌙 ?</div>
+      <div class="menu-item" data-target="story"><i class="fas fa-book-open"></i> STORY</div>
+      <div class="menu-item" data-target="graduation"><i class="fas fa-graduation-cap"></i> GRAD</div>
+      <div class="menu-item" data-target="future"><i class="fas fa-hourglass"></i> FUTURE</div>
+      <div class="menu-item" data-target="ending" style="grid-column: span 2;"><i class="fas fa-heart"></i> THANK YOU</div>
+    </div>
+  </section>
+
+  <!-- PROFILE -->
+  <section id="profile" class="scene">
+    <button class="back-btn" data-back="hub"><i class="fas fa-arrow-left"></i></button>
+    <h2>👤 PROFILE</h2>
+    <p style="max-width: 300px; margin-top: 30px; font-size: 1.3rem;">"Gadis paling jujur dan hangat yang pernah aku temuin. Kamu bikin dunia berasa lebih pelan dan lebih baik."</p>
+  </section>
+
+  <!-- MEMORIES (slideshow teks) -->
+  <section id="memories" class="scene">
+    <button class="back-btn" data-back="hub"><i class="fas fa-arrow-left"></i></button>
+    <div id="memory-slide" style="max-width: 320px;">
+      <p id="memory-text" style="font-size: 1.5rem;">Klik untuk lanjut...</p>
+      <p style="margin-top: 40px; opacity: 0.6;">(tap anywhere)</p>
+    </div>
+  </section>
+
+  <!-- MUSIC -->
+  <section id="music" class="scene">
+    <button class="back-btn" data-back="hub"><i class="fas fa-arrow-left"></i></button>
+    <h2>🎵 MUSIC</h2>
+    <p style="margin: 30px 0;">"Kalau aku adalah lagu, aku pengen jadi lagu yang kamu puter pas hujan, pas senja, atau pas kamu kangen sesuatu yang gak tau apa."</p>
+    <button id="playlist-btn"><i class="fab fa-spotify"></i> Dengerin Playlist Kita</button>
+  </section>
+
+  <!-- GAMES -->
+  <section id="games" class="scene">
+    <button class="back-btn" data-back="hub"><i class="fas fa-arrow-left"></i></button>
+    <h2>🎮 GAMES</h2>
+    <div style="width: 100%; max-width: 360px; margin-top: 20px;">
+      <div class="game-card" id="game1">
+        <h3>📋 Do I Really Know You?</h3>
+        <p id="quiz-question"></p>
+        <div id="quiz-options"></div>
+        <p id="quiz-result"></p>
+      </div>
+      <div class="game-card" id="game2">
+        <h3>🔍 Guess the Memory</h3>
+        <p>Clue: "Tempat pertama kali kita ngobrol lama"</p>
+        <input type="text" id="memory-guess" placeholder="jawaban...">
+        <button id="check-memory">Cek</button>
+        <p id="memory-result"></p>
+      </div>
+      <div class="game-card" id="game3">
+        <h3>⚖️ This or That</h3>
+        <div style="display: flex; gap: 20px; justify-content: center;">
+          <button id="opt1">☕ Kopi</button>
+          <button id="opt2">🍵 Teh</button>
+        </div>
+        <p id="vote-result"></p>
+      </div>
+      <div class="game-card" id="game4">
+        <h3>❤️ Tap Counter</h3>
+        <p>times Zahira lived in my head today</p>
+        <button id="tap-btn" style="font-size: 2rem;">+1</button>
+        <p>Counter: <span id="tap-count">0</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- HIDDEN PAGE (PEAK) -->
+  <section id="hidden" class="scene">
+    <button class="back-btn" data-back="hub"><i class="fas fa-arrow-left"></i></button>
+    <div style="text-align: center; max-width: 320px;">
+      <p class="fade-text" style="font-size: 1.8rem;">you found this…</p>
+      <p class="fade-text delay-1">berarti kamu orang yang merhatiin hal kecil</p>
+      <p class="fade-text delay-2">dan mungkin itu alasan kenapa kamu berarti buat aku</p>
+      <div style="margin: 30px 0;">
+        <img src="https://picsum.photos/300/300?random=42" alt="us" style="width: 200px; height: 200px; border-radius: 50%; object-fit: cover; border: 3px solid #a0c4ff; opacity: 0; animation: fadeInText 4s forwards 8s;">
+      </div>
+      <p class="fade-text delay-4">aku ga selalu nunjukin semuanya</p>
+      <p class="fade-text delay-5">tapi aku peduli</p>
+      <p class="fade-text delay-6" style="font-size: 2.5rem; font-weight: 600; color: #a0c4ff; text-shadow: 0 0 15px #a0c4ff;">stay with me.</p>
+    </div>
+  </section>
+
+  <!-- STORY (scroll) -->
+  <section id="story" class="scene story-active">
+    <button class="back-btn" data-back="hub"><i class="fas fa-arrow-left"></i></button>
+    <h2>📖 Cerpen</h2>
+    <div style="max-width: 400px; margin: 20px auto; text-align: left; line-height: 1.8;">
+      <p>Hari itu hujan, dan kamu datang bawa roti. Aku gak nyangka hal sekecil itu bisa bikin aku ngerasa dilihat. Kita ngobrol soal lagu, buku, dan hal-hal yang gak penting tapi berkesan. Kamu punya cara sendiri buat bikin dunia berhenti sejenak.</p>
+      <p style="margin-top: 20px;">Aku harap kamu tau, di antara semua chaos di kepala aku, kamu adalah bagian yang paling tenang. Terima kasih udah jadi Za-nya ZaQuChi.</p>
+      <p style="margin-top: 30px;">— [Nama Kamu]</p>
+    </div>
+  </section>
+
+  <!-- GRADUATION -->
+  <section id="graduation" class="scene">
+    <button class="back-btn" data-back="hub"><i class="fas fa-arrow-left"></i></button>
+    <h2>🎓 GRADUATION</h2>
+    <p style="margin: 30px;">"Congrats, Graduate! 🎓 Aku tau kamu lebih hebat dari yang kamu kira."</p>
+  </section>
+
+  <!-- FUTURE MESSAGE -->
+  <section id="future" class="scene">
+    <button class="back-btn" data-back="hub"><i class="fas fa-arrow-left"></i></button>
+    <h2>⏳ FUTURE MESSAGE</h2>
+    <p style="margin: 30px; font-style: italic;">"Pesan ini baru bisa kamu buka nanti... tapi aku cuma mau bilang, aku harap kita masih sama-sama."</p>
+  </section>
+
+  <!-- THANK YOU & ENDING (digabung) -->
+  <section id="ending" class="scene">
+    <h2>💙 THANK YOU</h2>
+    <p style="margin: 20px;">Makasih udah mampir di kepala aku.</p>
+    <p style="margin-top: 60px; font-size: 0.9rem; opacity: 0.7;">Jakarta, <span id="today-date"></span><br>only for my zaquchi.</p>
+    <button class="back-btn" data-back="hub" style="position: static; margin-top: 40px;"><i class="fas fa-home"></i> Kembali</button>
+  </section>
+
+  <!-- Youtube iframe (tersembunyi) -->
+  <div id="youtube-player"></div>
+</div>
+
+<script>
+  (function(){
+    "use strict";
+
+    // ---------- DATA ----------
+    const PASSWORD = "liar";
+    let hintStep = 0;
+    let memorySlide = 0;
+    const memoryTexts = [
+      "Aku ingat pertama kali liat kamu makan roti... aneh, tapi di situ aku sadar kamu lucu.",
+      "Kamu pernah ngasih aku coklat pas aku lagi down. Itu kecil, tapi masih aku simpen ingetannya.",
+      "Warna hidupku mulai muncul sejak kamu ada.",
+      "Kamu rekomendasiin lagu itu... dan sekarang lagu itu jadi tentang kamu."
+    ];
+
+    // Quiz
+    const quizData = [
+      { q: "Zahira lebih takut sama apa?", opts: ["Cicak", "Ditolak lamaran kerja", "Ketinggian"], ans: 0 },
+      { q: "Minuman favorit Zahira?", opts: ["Kopi", "Teh", "Matcha"], ans: 1 },
+      { q: "Warna favorit?", opts: ["Biru", "Ungu", "Hitam"], ans: 0 }
+    ];
+    let quizIndex = 0;
+
+    // Scene elements
+    const scenes = {
+      opening: document.getElementById('opening'),
+      question: document.getElementById('question'),
+      password: document.getElementById('password'),
+      hub: document.getElementById('hub'),
+      profile: document.getElementById('profile'),
+      memories: document.getElementById('memories'),
+      music: document.getElementById('music'),
+      games: document.getElementById('games'),
+      hidden: document.getElementById('hidden'),
+      story: document.getElementById('story'),
+      graduation: document.getElementById('graduation'),
+      future: document.getElementById('future'),
+      ending: document.getElementById('ending')
+    };
+
+    let currentScene = 'opening';
+    
+    // Audio (YouTube)
+    let player;
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player('youtube-player', {
+        height: '1',
+        width: '1',
+        videoId: 'nPwLYVp8Ezw', // Daniel Caesar - Blessed (unofficial audio)
+        playerVars: {
+          autoplay: 0,
+          controls: 0,
+          loop: 1,
+          playlist: 'nPwLYVp8Ezw'
+        },
+        events: {
+          'onReady': onPlayerReady
+        }
+      });
+    }
+    function onPlayerReady(event) {
+      // tidak langsung play, nanti saat opening
+    }
+
+    // Load YouTube API
+    const tag = document.createElement('script');
+    tag.src = "https://www.youtube.com/iframe_api";
+    const firstScriptTag = document.getElementsByTagName('script')[0];
+    firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+    // Helper switch scene
+    function switchScene(sceneId) {
+      Object.values(scenes).forEach(s => s.classList.remove('active'));
+      scenes[sceneId].classList.add('active');
+      currentScene = sceneId;
+      
+      // Background foto di hub
+      if (sceneId === 'hub') {
+        document.getElementById('bg-photo').style.display = 'block';
+      } else {
+        document.getElementById('bg-photo').style.display = 'none';
+      }
+
+      // Special: play music at opening
+      if (sceneId === 'opening' && player && player.playVideo) {
+        player.playVideo();
+        player.setVolume(10);
+      }
+    }
+
+    // Typewriter opening
+    const texts = ["hi zahira", "i made something for you", "baca pelan pelan aja ya"];
+    let twIndex = 0;
+    let charIndex = 0;
+    const twElement = document.getElementById('typewriter-text');
+    const startBtn = document.getElementById('start-btn');
+
+    function typeNext() {
+      if (twIndex < texts.length) {
+        if (charIndex < texts[twIndex].length) {
+          twElement.innerHTML += texts[twIndex].charAt(charIndex);
+          charIndex++;
+          setTimeout(typeNext, 80);
+        } else {
+          twElement.innerHTML += '<br>';
+          twIndex++;
+          charIndex = 0;
+          setTimeout(typeNext, 400);
+        }
+      } else {
+        startBtn.style.display = 'inline-block';
+        twElement.style.borderRight = 'none';
+      }
+    }
+    setTimeout(typeNext, 300);
+
+    startBtn.addEventListener('click', () => switchScene('question'));
+
+    // Question
+    document.getElementById('iya-btn').addEventListener('click', () => switchScene('password'));
+    const tidakBtn = document.getElementById('tidak-btn');
+    tidakBtn.addEventListener('mouseover', function(e) {
+      if (currentScene === 'question') {
+        const x = (Math.random() - 0.5) * 200;
+        const y = (Math.random() - 0.5) * 100;
+        this.style.transform = `translate(${x}px, ${y}px)`;
+      }
+    });
+    tidakBtn.addEventListener('click', () => {
+      document.getElementById('hint-msg').innerText = "😠 coba lagi... pencet iya aja deh";
+    });
+
+    // Password
+    const pwInput = document.getElementById('password-input');
+    const submitPw = document.getElementById('submit-pw');
+    const hintBtn = document.getElementById('hint-btn');
+    const hintDisplay = document.getElementById('hint-display');
+    const pwError = document.getElementById('pw-error');
+
+    function checkPassword() {
+      if (pwInput.value.trim().toLowerCase() === PASSWORD) {
+        localStorage.setItem('zaquchi_auth', 'true');
+        switchScene('hub');
+      } else {
+        pwError.innerText = 'password salah, coba hint';
+      }
+    }
+    submitPw.addEventListener('click', checkPassword);
+    pwInput.addEventListener('keypress', (e) => { if(e.key==='Enter') checkPassword(); });
+
+    hintBtn.addEventListener('click', () => {
+      if (hintStep === 0) hintDisplay.innerText = 'Hint: anak kucing';
+      else if (hintStep === 1) hintDisplay.innerText = 'Hint: aku pernah panggil kamu ini...';
+      else hintDisplay.innerText = 'Hint: l i a r';
+      hintStep++;
+    });
+
+    // Check localstorage
+    if (localStorage.getItem('zaquchi_auth') === 'true') {
+      // skip opening etc? lebih baik tetap mulai dari opening tapi kita bisa percepat? Terserah.
+      // Biarkan user alami lagi.
+    }
+
+    // Hub menu navigation
+    document.querySelectorAll('.menu-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const target = item.dataset.target;
+        if (target) switchScene(target);
+      });
+    });
+
+    // Back buttons
+    document.querySelectorAll('[data-back]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        switchScene(btn.dataset.back);
+      });
+    });
+
+    // Memories slideshow
+    const memoryTextEl = document.getElementById('memory-text');
+    scenes.memories.addEventListener('click', () => {
+      if (memorySlide < memoryTexts.length) {
+        memoryTextEl.innerText = memoryTexts[memorySlide];
+        memorySlide++;
+      } else {
+        memoryTextEl.innerText = "Itu sedikit kenangan kita. 💙";
+      }
+    });
+
+    // Music playlist dummy
+    document.getElementById('playlist-btn').addEventListener('click', () => {
+      window.open('https://open.spotify.com/playlist/37i9dQZF1DXcBWIGoYBM5M', '_blank');
+    });
+
+    // Games
+    // Game 1 Quiz
+    const quizQuestion = document.getElementById('quiz-question');
+    const quizOptions = document.getElementById('quiz-options');
+    const quizResult = document.getElementById('quiz-result');
+    function loadQuiz(index) {
+      if (index >= quizData.length) {
+        quizQuestion.innerText = "Selesai! Kamu lumayan kenal dia.";
+        quizOptions.innerHTML = '';
+        return;
+      }
+      const q = quizData[index];
+      quizQuestion.innerText = q.q;
+      quizOptions.innerHTML = '';
+      q.opts.forEach((opt, i) => {
+        const btn = document.createElement('button');
+        btn.innerText = opt;
+        btn.style.margin = '5px';
+        btn.addEventListener('click', () => {
+          if (i === q.ans) {
+            quizResult.innerText = '✅ Benar!';
+            setTimeout(() => {
+              quizResult.innerText = '';
+              loadQuiz(index+1);
+            }, 800);
+          } else {
+            quizResult.innerText = '❌ Coba lagi';
+          }
+        });
+        quizOptions.appendChild(btn);
+      });
+    }
+    loadQuiz(0);
+
+    // Guess memory
+    document.getElementById('check-memory').addEventListener('click', () => {
+      const guess = document.getElementById('memory-guess').value.trim().toLowerCase();
+      if (guess.includes('roti') || guess.includes('bakery')) {
+        document.getElementById('memory-result').innerText = 'Benar! Roti itu awal mula.';
+      } else {
+        document.getElementById('memory-result').innerText = 'Clue: tentang roti...';
+      }
+    });
+
+    // This or that
+    document.getElementById('opt1').addEventListener('click', () => {
+      document.getElementById('vote-result').innerText = 'Kamu pilih Kopi ☕';
+    });
+    document.getElementById('opt2').addEventListener('click', () => {
+      document.getElementById('vote-result').innerText = 'Kamu pilih Teh 🍵';
+    });
+
+    // Tap counter
+    let tapCount = 0;
+    document.getElementById('tap-btn').addEventListener('click', () => {
+      tapCount++;
+      document.getElementById('tap-count').innerText = tapCount;
+    });
+
+    // Date today
+    const today = new Date();
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    document.getElementById('today-date').innerText = today.toLocaleDateString('id-ID', options);
+
+    // Fungsi reset memory slide saat masuk memories
+    const origMemories = switchScene;
+    window.switchScene = function(sceneId) {
+      if (sceneId === 'memories') {
+        memorySlide = 0;
+        memoryTextEl.innerText = 'Klik untuk lanjut...';
+      }
+      if (sceneId === 'games') {
+        // reset quiz?
+        quizIndex = 0;
+        loadQuiz(0);
+      }
+      switchScene(sceneId);
+    };
+    // override
+    const originalSwitch = switchScene;
+    switchScene = function(id) {
+      if (id === 'memories') {
+        memorySlide = 0;
+        memoryTextEl.innerText = 'Klik untuk lanjut...';
+      }
+      if (id === 'games') {
+        quizIndex = 0;
+        loadQuiz(0);
+      }
+      originalSwitch(id);
+    };
+
+    // bind ulang navigasi
+    document.querySelectorAll('.menu-item').forEach(item => {
+      item.removeEventListener('click', null);
+      item.addEventListener('click', () => {
+        const target = item.dataset.target;
+        if (target) switchScene(target);
+      });
+    });
+
+    // Set volume saat mulai
+    window.onYouTubeIframeAPIReady = onYouTubeIframeAPIReady;
+  })();
+</script>
+</body>
+</html>
